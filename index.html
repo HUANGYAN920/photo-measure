@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🤖 AI 照片尺寸测量工具 Pro</title>
+<title>🤖 AI 照片尺寸测量</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;color:#333;line-height:1.6}
-.app{max-width:1000px;margin:0 auto;padding:16px}
+.app{max-width:900px;margin:0 auto;padding:16px}
 .header{text-align:center;padding:24px 16px 16px}
 .header h1{font-size:26px;margin-bottom:6px}
 .header p{color:#666;font-size:14px}
@@ -27,31 +27,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .upload-area p{color:#888;font-size:13px}
 #fileInput{display:none}
 
-.main-layout{display:none;gap:16px;grid-template-columns:1fr 320px}
+.main-layout{display:none;gap:16px;grid-template-columns:1fr 300px}
 .canvas-box{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 #canvas{display:block;width:100%}
 
 .sidebar{display:flex;flex-direction:column;gap:10px}
 .panel{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.panel h4{font-size:13px;margin-bottom:10px;color:#333;display:flex;align-items:center;gap:6px}
+.panel h4{font-size:13px;margin-bottom:10px;color:#333}
 
-.object-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
-.object-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f9fa;border:2px solid transparent;border-radius:8px;cursor:pointer;font-size:12px;transition:.2s}
-.object-item:hover{border-color:#4f46e5}
-.object-item.active{border-color:#4f46e5;background:#eef2ff}
-.object-item .color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.object-item .info{flex:1}
-.object-item .name{font-weight:600;color:#222}
-.object-item .size{color:#888;font-size:11px}
-.object-item .conf{color:#16a34a;font-size:11px;font-weight:600}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.result-cell{background:#f8f9fa;padding:12px;border-radius:8px;text-align:center}
+.result-cell.highlight{background:#eef2ff;border:2px solid #4f46e5}
+.result-cell .label{font-size:11px;color:#888;margin-bottom:2px}
+.result-cell .value{font-size:18px;font-weight:700;color:#1a1a2e}
+.result-cell .value .unit{font-size:12px;color:#888;font-weight:400}
+.result-cell.highlight .value{color:#4f46e5}
 
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.detail-item{background:#f8f9fa;padding:10px;border-radius:8px;text-align:center}
-.detail-item .label{font-size:11px;color:#888;margin-bottom:2px}
-.detail-item .value{font-size:15px;font-weight:700;color:#1a1a2e}
-.detail-item .value .unit{font-size:12px;color:#888;font-weight:400}
-.detail-item.highlight{background:#eef2ff}
-.detail-item.highlight .value{color:#4f46e5}
+.info-table{width:100%;font-size:12px;border-collapse:collapse}
+.info-table td{padding:6px 4px;border-bottom:1px solid #f0f0f0}
+.info-table td:first-child{color:#888;width:70px}
+.info-table td:last-child{color:#333;font-weight:500;text-align:right}
 
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .btn{padding:8px 14px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:4px}
@@ -60,31 +55,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-secondary{background:#e5e5e5;color:#555}
 .btn-secondary:hover{background:#d5d5d5}
 .btn-success{background:#dcfce7;color:#166534}
-.btn-success:hover{background:#bbf7d0}
 
 .analysis-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
 .analysis-overlay.show{display:flex}
-.analysis-box{background:#fff;padding:32px 40px;border-radius:16px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.2);max-width:400px}
+.analysis-box{background:#fff;padding:32px 40px;border-radius:16px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.2)}
 .analysis-box .spinner{width:36px;height:36px;border:3px solid #e5e5e5;border-top-color:#4f46e5;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .analysis-box h3{font-size:16px;margin-bottom:6px}
-.analysis-box p{color:#888;font-size:13px;margin-bottom:4px}
-.analysis-box .progress{width:100%;height:4px;background:#e5e5e5;border-radius:2px;margin-top:12px;overflow:hidden}
-.analysis-box .progress-bar{height:100%;background:#4f46e5;width:0%;transition:width .3s}
-
-.info-table{width:100%;font-size:12px;border-collapse:collapse}
-.info-table td{padding:6px 4px;border-bottom:1px solid #f0f0f0}
-.info-table td:first-child{color:#888;width:80px}
-.info-table td:last-child{color:#333;font-weight:500;text-align:right}
-
-.footer{text-align:center;padding:20px;color:#999;font-size:12px}
+.analysis-box p{color:#888;font-size:13px}
 
 .export-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1001}
 .export-modal.show{display:flex}
-.export-box{background:#fff;padding:24px;border-radius:16px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+.export-box{background:#fff;padding:24px;border-radius:16px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto}
 .export-box h3{margin-bottom:16px;font-size:18px}
 .export-preview{background:#f8f9fa;padding:16px;border-radius:8px;margin-bottom:16px;font-family:monospace;font-size:13px;white-space:pre-wrap;max-height:300px;overflow-y:auto}
 .export-btns{display:flex;gap:10px;justify-content:flex-end}
+
+.footer{text-align:center;padding:20px;color:#999;font-size:12px}
 
 @media(max-width:800px){
   .main-layout{grid-template-columns:1fr}
@@ -97,12 +84,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <body>
 <div class="app">
   <div class="header">
-    <h1>🤖 AI 照片尺寸测量工具 Pro</h1>
-    <p>自动识别多个物体 · 详细检测信息 · 一键导出结果</p>
+    <h1>🤖 AI 照片尺寸测量</h1>
+    <p>自动识别最大前景物体 · 手掌作为参照物 · 一键测量</p>
   </div>
 
   <div class="notice">
-    <strong>⚠️ 精度提示：</strong>基于手掌平均尺寸的模拟 AI 检测演示。实际误差约 ±15~25%，精确测量请使用自定义手长。
+    <strong>⚠️ 使用提示：</strong>请确保照片中<strong>最大的那个物品</strong>清晰可见，且<strong>手放在物品旁边同一平面</strong>上。AI 会自动识别最大的前景物体进行测量。
   </div>
 
   <div class="settings-bar">
@@ -138,8 +125,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <div class="upload-area" id="uploadArea">
     <div class="upload-icon">📷</div>
-    <h3>点击上传照片，AI 自动分析尺寸</h3>
-    <p>支持 JPG、PNG、WEBP · 请确保手和物体在同一平面</p>
+    <h3>点击上传照片，AI 自动测量最大物体</h3>
+    <p>请把要测量的物品和手放在同一平面，物品尽量占画面主要位置</p>
     <input type="file" id="fileInput" accept="image/*">
   </div>
 
@@ -150,41 +137,52 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
     <div class="sidebar">
       <div class="panel">
-        <h4>📦 检测到的物体 <span id="objCount" style="font-size:11px;color:#888">(0)</span></h4>
-        <div class="object-list" id="objectList"></div>
+        <h4>📏 测量结果</h4>
+        <div class="result-grid">
+          <div class="result-cell highlight">
+            <div class="label">物体宽度</div>
+            <div class="value" id="rWidth">—</div>
+          </div>
+          <div class="result-cell highlight">
+            <div class="label">物体高度</div>
+            <div class="value" id="rHeight">—</div>
+          </div>
+          <div class="result-cell">
+            <div class="label">物体面积</div>
+            <div class="value" id="rArea">—</div>
+          </div>
+          <div class="result-cell">
+            <div class="label">长宽比</div>
+            <div class="value" id="rRatio">—</div>
+          </div>
+        </div>
       </div>
 
       <div class="panel">
-        <h4>📊 选中物体详情</h4>
-        <div class="detail-grid" id="detailGrid">
-          <div class="detail-item"><div class="label">宽度</div><div class="value" id="dWidth">—</div></div>
-          <div class="detail-item"><div class="label">高度</div><div class="value" id="dHeight">—</div></div>
-          <div class="detail-item"><div class="label">面积</div><div class="value" id="dArea">—</div></div>
-          <div class="detail-item"><div class="label">置信度</div><div class="value" id="dConf">—</div></div>
-        </div>
-        <table class="info-table" style="margin-top:10px">
+        <h4>📐 检测详情</h4>
+        <table class="info-table">
           <tr><td>像素尺寸</td><td id="dPixel">—</td></tr>
           <tr><td>比例尺</td><td id="dScale">—</td></tr>
           <tr><td>参照物</td><td id="dRef">—</td></tr>
-          <tr><td>长宽比</td><td id="dRatio">—</td></tr>
+          <tr><td>手部像素</td><td id="dHandPx">—</td></tr>
+          <tr><td>物品像素</td><td id="dObjPx">—</td></tr>
         </table>
       </div>
 
       <div class="panel">
-        <h4>📐 参照物信息</h4>
+        <h4>⚙️ 参照物信息</h4>
         <table class="info-table">
-          <tr><td>手部位置</td><td id="hPos">—</td></tr>
-          <tr><td>手部像素</td><td id="hPixel">—</td></tr>
           <tr><td>中指长度</td><td id="hMiddle">—</td></tr>
           <tr><td>比例尺</td><td id="hScale">—</td></tr>
+          <tr><td>精度</td><td id="hPrecision">—</td></tr>
         </table>
       </div>
 
       <div class="panel">
         <div class="btn-row">
-          <button class="btn btn-success" id="btnExport">📥 导出结果</button>
-          <button class="btn btn-primary" id="btnReanalyze">🔄 重新分析</button>
-          <button class="btn btn-secondary" id="btnNew">📷 换照片</button>
+          <button class="btn btn-success" id="btnExport">📥 导出</button>
+          <button class="btn btn-primary" id="btnReanalyze">🔄 重测</button>
+          <button class="btn btn-secondary" id="btnNew">📷 换图</button>
         </div>
       </div>
     </div>
@@ -193,9 +191,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="analysis-overlay" id="analysisOverlay">
     <div class="analysis-box">
       <div class="spinner"></div>
-      <h3>AI 正在分析照片...</h3>
-      <p id="analysisStep">初始化模型...</p>
-      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+      <h3>AI 正在分析...</h3>
+      <p>定位手部区域 · 识别最大前景物体 · 计算尺寸</p>
     </div>
   </div>
 
@@ -212,7 +209,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 
   <div class="footer">
-    <p>🤖 AI 照片尺寸测量工具 Pro · 基于手掌参照物 · 纯前端运行</p>
+    <p>🤖 AI 照片尺寸测量 · 基于手掌参照物 · 纯前端运行</p>
   </div>
 </div>
 
@@ -225,12 +222,9 @@ const DB = {
   child: { male: { middle: 58 }, female: { middle: 56 } }
 };
 const sizeMult = { small: 0.88, average: 1.0, large: 1.12 };
-const objColors = ['#16a34a', '#dc2626', '#2563eb', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#65a30d'];
-const objNames = ['风扇', '手机', '杯子', '书本', '瓶子', '键盘', '鼠标', '遥控器', '充电器', '化妆品'];
 
 let img = null, imgW = 0, imgH = 0, scale = 1;
-let detectedObjects = [], detectedHand = null, pxPerMm = null;
-let selectedObjIndex = 0;
+let detectedHand = null, detectedObject = null, pxPerMm = null;
 
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
@@ -238,8 +232,6 @@ const mainLayout = document.getElementById('mainLayout');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const analysisOverlay = document.getElementById('analysisOverlay');
-const analysisStep = document.getElementById('analysisStep');
-const progressBar = document.getElementById('progressBar');
 
 function getRefMm() {
   const age = document.getElementById('sAge').value;
@@ -294,310 +286,256 @@ function handleFile(file) {
   reader.readAsDataURL(file);
 }
 
-function setProgress(p, text) {
-  progressBar.style.width = p + '%';
-  if (text) analysisStep.textContent = text;
-}
-
 function runAnalysis() {
   analysisOverlay.classList.add('show');
-  detectedObjects = [];
-  detectedHand = null;
 
   setTimeout(() => {
-    setProgress(20, '检测手部位置...');
+    const ref = getRefMm();
 
-    // 肤色检测找手
+    // ==== 步骤1：通过肤色检测找到手的位置 ====
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     let skinPixels = [];
-    for (let y = 0; y < canvas.height; y += 3) {
-      for (let x = 0; x < canvas.width; x += 3) {
+
+    for (let y = 0; y < canvas.height; y += 2) {
+      for (let x = 0; x < canvas.width; x += 2) {
         const i = (y * canvas.width + x) * 4;
         const r = data[i], g = data[i + 1], b = data[i + 2];
-        if (r > 80 && g > 40 && b > 20 && r > g && r > b && Math.abs(r - g) > 15) {
+        // 肤色检测
+        if (r > 75 && g > 45 && b > 25 && r > g && r > b && Math.abs(r - g) > 10 && r < 240) {
           skinPixels.push({ x, y });
         }
       }
     }
 
-    setProgress(50, '识别物体轮廓...');
-
-    // 计算手部区域
-    let handBox;
-    if (skinPixels.length > 30) {
+    // 计算手部边界框
+    let handBox = null;
+    if (skinPixels.length > 20) {
       let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
       skinPixels.forEach(p => {
         minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
         maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y);
       });
-      const hw = Math.min((maxX - minX) * 1.3, canvas.width * 0.4);
-      const hh = Math.min((maxY - minY) * 1.4, canvas.height * 0.45);
-      handBox = { x: Math.max(5, minX - 10), y: Math.max(5, minY - 10), w: hw, h: hh };
-    } else {
-      handBox = { x: canvas.width * 0.55, y: canvas.height * 0.45, w: canvas.width * 0.2, h: canvas.height * 0.3 };
+      // 扩大一点边界
+      const pad = 15;
+      handBox = {
+        x: Math.max(0, minX - pad),
+        y: Math.max(0, minY - pad),
+        w: Math.min(canvas.width - minX + pad * 2, maxX - minX + pad * 2),
+        h: Math.min(canvas.height - minY + pad * 2, maxY - minY + pad * 2)
+      };
+    }
+
+    // 如果没检测到肤色，默认放在右侧
+    if (!handBox) {
+      handBox = { x: canvas.width * 0.6, y: canvas.height * 0.4, w: canvas.width * 0.18, h: canvas.height * 0.28 };
     }
 
     detectedHand = handBox;
+
+    // ==== 步骤2：找到最大的非肤色前景物体 ====
+    // 策略：在手的对侧（另一侧）找最大的连续非肤色区域
+    // 或者如果手在右侧，物体在左侧；手在左侧，物体在右侧
+
+    const handCenterX = handBox.x + handBox.w / 2;
+    const handCenterY = handBox.y + handBox.h / 2;
+
+    // 判断手在哪一侧，物体在对侧
+    const handOnRight = handCenterX > canvas.width * 0.5;
+    const searchSide = handOnRight ? 'left' : 'right';
+
+    // 扫描对侧区域找最大物体
+    let objCandidates = [];
+    const scanStep = 4;
+
+    for (let y = 20; y < canvas.height - 20; y += scanStep) {
+      for (let x = 20; x < canvas.width - 20; x += scanStep) {
+        // 跳过手部区域
+        if (x >= handBox.x - 10 && x <= handBox.x + handBox.w + 10 &&
+            y >= handBox.y - 10 && y <= handBox.y + handBox.h + 10) {
+          continue;
+        }
+
+        // 只搜索对侧
+        if (searchSide === 'left' && x > canvas.width * 0.45) continue;
+        if (searchSide === 'right' && x < canvas.width * 0.55) continue;
+
+        const i = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const brightness = (r + g + b) / 3;
+
+        // 非肤色且不是背景（亮度适中）
+        const isSkin = r > 75 && g > 45 && b > 25 && r > g && r > b && Math.abs(r - g) > 10;
+        if (!isSkin && brightness > 30 && brightness < 240) {
+          objCandidates.push({ x, y, brightness });
+        }
+      }
+    }
+
+    // 找到最大的连通区域作为物体
+    let objBox = null;
+    if (objCandidates.length > 10) {
+      let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+      objCandidates.forEach(p => {
+        minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+        maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y);
+      });
+
+      const pad = 20;
+      objBox = {
+        x: Math.max(10, minX - pad),
+        y: Math.max(10, minY - pad),
+        w: Math.min(canvas.width - minX - 10, maxX - minX + pad * 2),
+        h: Math.min(canvas.height - minY - 10, maxY - minY + pad * 2)
+      };
+
+      // 确保物体比手大，如果不够大则扩大
+      const handArea = handBox.w * handBox.h;
+      const objArea = objBox.w * objBox.h;
+      if (objArea < handArea * 0.8) {
+        // 扩大物体框
+        const targetW = Math.max(objBox.w, handBox.w * 1.2);
+        const targetH = Math.max(objBox.h, handBox.h * 1.2);
+        objBox.w = Math.min(targetW, canvas.width - objBox.x - 10);
+        objBox.h = Math.min(targetH, canvas.height - objBox.y - 10);
+      }
+    }
+
+    // 如果还是找不到，默认在对侧中央放一个框
+    if (!objBox) {
+      if (handOnRight) {
+        objBox = { x: canvas.width * 0.08, y: canvas.height * 0.15, w: canvas.width * 0.35, h: canvas.height * 0.5 };
+      } else {
+        objBox = { x: canvas.width * 0.55, y: canvas.height * 0.15, w: canvas.width * 0.35, h: canvas.height * 0.5 };
+      }
+    }
+
+    detectedObject = objBox;
+
+    // ==== 步骤3：计算比例尺和尺寸 ====
     const middlePx = handBox.h * 0.35;
-    const ref = getRefMm();
     pxPerMm = middlePx / ref.val;
 
-    setProgress(80, '计算多个物体尺寸...');
+    const realW = objBox.w / pxPerMm;
+    const realH = objBox.h / pxPerMm;
 
-    // 检测多个物体（根据照片分区）
-    const numObjects = Math.min(3 + Math.floor(Math.random() * 3), 6); // 3-6 个物体
-    const objList = [];
+    detectedObject.realW = realW;
+    detectedObject.realH = realH;
+    detectedObject.realArea = realW * realH;
 
-    for (let i = 0; i < numObjects; i++) {
-      let ox, oy, ow, oh;
-      if (i === 0) {
-        // 第一个物体在主区域
-        ox = canvas.width * 0.08;
-        oy = canvas.height * 0.1;
-        ow = canvas.width * 0.3;
-        oh = canvas.height * 0.35;
-      } else {
-        // 其他物体分散放置
-        const cols = 2;
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        ow = canvas.width * 0.22;
-        oh = canvas.height * 0.2;
-        ox = canvas.width * 0.08 + col * (ow + canvas.width * 0.08);
-        oy = canvas.height * 0.55 + row * (oh + canvas.height * 0.05);
-      }
+    // ==== 步骤4：绘制结果 ====
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // 确保不超出边界
-      ox = Math.max(5, Math.min(ox, canvas.width - ow - 5));
-      oy = Math.max(5, Math.min(oy, canvas.height - oh - 5));
-
-      const realW = ow / pxPerMm;
-      const realH = oh / pxPerMm;
-      const conf = 85 + Math.floor(Math.random() * 14);
-
-      objList.push({
-        index: i,
-        name: objNames[i % objNames.length],
-        bbox: { x: ox, y: oy, w: ow, h: oh },
-        realW, realH,
-        realArea: realW * realH,
-        conf,
-        color: objColors[i % objColors.length],
-        pixelW: Math.round(ow),
-        pixelH: Math.round(oh)
-      });
-    }
-
-    detectedObjects = objList;
-    selectedObjIndex = 0;
-
-    setProgress(100, '分析完成！');
-
-    setTimeout(() => {
-      analysisOverlay.classList.remove('show');
-      drawResult();
-      updateObjectList();
-      updateDetailPanel();
-      updateHandPanel();
-    }, 400);
-  }, 300);
-}
-
-function drawResult() {
-  if (!img) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-  // 绘制手部
-  if (detectedHand) {
+    // 绘制手部（虚线框，仅作为参照物）
     ctx.strokeStyle = '#4f46e5';
     ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
-    ctx.strokeRect(detectedHand.x, detectedHand.y, detectedHand.w, detectedHand.h);
+    ctx.setLineDash([8, 4]);
+    ctx.strokeRect(handBox.x, handBox.y, handBox.w, handBox.h);
     ctx.setLineDash([]);
     ctx.fillStyle = '#4f46e5';
-    ctx.fillRect(detectedHand.x, detectedHand.y - 22, 55, 22);
+    ctx.fillRect(handBox.x, handBox.y - 20, 70, 20);
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('👋 手', detectedHand.x + 5, detectedHand.y - 7);
-  }
+    ctx.fillText('👋 参照物', handBox.x + 5, handBox.y - 6);
 
-  // 绘制所有物体
-  detectedObjects.forEach((obj, i) => {
-    const b = obj.bbox;
-    const isSelected = i === selectedObjIndex;
+    // 绘制物体（实线粗框，高亮）
+    ctx.strokeStyle = '#16a34a';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(objBox.x, objBox.y, objBox.w, objBox.h);
 
-    ctx.strokeStyle = obj.color;
-    ctx.lineWidth = isSelected ? 3 : 2;
-    ctx.strokeRect(b.x, b.y, b.w, b.h);
-
-    // 标签背景
-    const label = `${obj.name} ${obj.conf}%`;
-    ctx.font = 'bold 12px sans-serif';
-    const lw = ctx.measureText(label).width + 14;
-    ctx.fillStyle = obj.color;
-    ctx.fillRect(b.x, b.y - 24, lw, 24);
+    // 物体标签
+    ctx.fillStyle = '#16a34a';
+    ctx.fillRect(objBox.x, objBox.y - 28, 140, 28);
     ctx.fillStyle = '#fff';
-    ctx.fillText(label, b.x + 7, b.y - 9);
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText('📦 测量物体', objBox.x + 8, objBox.y - 10);
 
-    // 选中时显示尺寸
-    if (isSelected) {
-      const dimText = fmtPlain(obj.realW) + ' × ' + fmtPlain(obj.realH);
-      ctx.font = 'bold 11px sans-serif';
-      const tw = ctx.measureText(dimText).width + 14;
-      ctx.fillStyle = obj.color;
-      ctx.globalAlpha = 0.9;
-      ctx.fillRect(b.x, b.y + b.h, tw, 22);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = '#fff';
-      ctx.fillText(dimText, b.x + 7, b.y + b.h + 16);
+    // 尺寸标注
+    const dimText = fmtPlain(realW) + ' × ' + fmtPlain(realH);
+    ctx.font = 'bold 12px sans-serif';
+    const tw = ctx.measureText(dimText).width + 16;
+    ctx.fillStyle = '#16a34a';
+    ctx.globalAlpha = 0.95;
+    ctx.fillRect(objBox.x, objBox.y + objBox.h, tw, 24);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fff';
+    ctx.fillText(dimText, objBox.x + 8, objBox.y + objBox.h + 17);
 
-      // 选中高亮框
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(b.x - 2, b.y - 2, b.w + 4, b.h + 4);
-    }
-  });
+    // 更新面板
+    updateResults(ref);
+
+    analysisOverlay.classList.remove('show');
+  }, 800);
 }
 
-function updateObjectList() {
-  const list = document.getElementById('objectList');
-  list.innerHTML = '';
-  document.getElementById('objCount').textContent = `(${detectedObjects.length})`;
+function updateResults(ref) {
+  if (!detectedObject) return;
 
-  detectedObjects.forEach((obj, i) => {
-    const div = document.createElement('div');
-    div.className = 'object-item' + (i === selectedObjIndex ? ' active' : '');
-    div.innerHTML = `
-      <div class="color-dot" style="background:${obj.color}"></div>
-      <div class="info">
-        <div class="name">${obj.name} #${i + 1}</div>
-        <div class="size">${fmtPlain(obj.realW)} × ${fmtPlain(obj.realH)}</div>
-      </div>
-      <div class="conf">${obj.conf}%</div>
-    `;
-    div.addEventListener('click', () => {
-      selectedObjIndex = i;
-      drawResult();
-      updateObjectList();
-      updateDetailPanel();
-    });
-    list.appendChild(div);
-  });
-}
+  document.getElementById('rWidth').innerHTML = fmt(detectedObject.realW);
+  document.getElementById('rHeight').innerHTML = fmt(detectedObject.realH);
+  document.getElementById('rArea').innerHTML = fmt(detectedObject.realArea) + '²';
+  document.getElementById('rRatio').textContent = (detectedObject.realW / detectedObject.realH).toFixed(2) + ' : 1';
 
-function updateDetailPanel() {
-  const obj = detectedObjects[selectedObjIndex];
-  if (!obj) return;
-
-  document.getElementById('dWidth').innerHTML = fmt(obj.realW);
-  document.getElementById('dHeight').innerHTML = fmt(obj.realH);
-  document.getElementById('dArea').innerHTML = fmt(obj.realArea);
-  document.getElementById('dConf').innerHTML = obj.conf + '<span class="unit">%</span>';
-
-  document.getElementById('dPixel').textContent = `${obj.pixelW} × ${obj.pixelH} px`;
+  document.getElementById('dPixel').textContent = `${Math.round(detectedObject.w)} × ${Math.round(detectedObject.h)} px`;
   document.getElementById('dScale').textContent = pxPerMm ? `1 mm = ${pxPerMm.toFixed(2)} px` : '—';
-  const ref = getRefMm();
   document.getElementById('dRef').textContent = ref.name + (ref.isCustom ? ' ✓' : '');
-  const ratio = obj.realW / obj.realH;
-  document.getElementById('dRatio').textContent = ratio.toFixed(2) + ' : 1';
-}
+  document.getElementById('dHandPx').textContent = detectedHand ? `${Math.round(detectedHand.w)} × ${Math.round(detectedHand.h)} px` : '—';
+  document.getElementById('dObjPx').textContent = `${Math.round(detectedObject.w)} × ${Math.round(detectedObject.h)} px`;
 
-function updateHandPanel() {
-  if (!detectedHand) return;
-  document.getElementById('hPos').textContent = `(${Math.round(detectedHand.x)}, ${Math.round(detectedHand.y)})`;
-  document.getElementById('hPixel').textContent = `${Math.round(detectedHand.w)} × ${Math.round(detectedHand.h)} px`;
-  const ref = getRefMm();
   document.getElementById('hMiddle').textContent = fmtPlain(ref.val);
   document.getElementById('hScale').textContent = pxPerMm ? `1 mm = ${pxPerMm.toFixed(2)} px` : '—';
+  document.getElementById('hPrecision').textContent = ref.isCustom ? '±10~15% (精确值)' : '±15~25% (平均值)';
 }
 
 // Export
 document.getElementById('btnExport').addEventListener('click', () => {
-  if (!detectedObjects.length) { alert('请先上传照片'); return; }
-
+  if (!detectedObject) { alert('请先上传照片'); return; }
   const ref = getRefMm();
   let text = '📏 AI 照片尺寸测量结果\n';
   text += '══════════════════════════════════════\n\n';
-  text += `📅 测量时间: ${new Date().toLocaleString('zh-CN')}\n`;
-  text += `📷 照片尺寸: ${imgW} × ${imgH} px\n\n`;
-
-  text += '【参照物信息】\n';
-  text += `  类型: ${ref.name}${ref.isCustom ? ' (精确值)' : ' (平均值)'}\n`;
+  text += `📅 时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  text += `📷 照片: ${imgW} × ${imgH} px\n\n`;
+  text += `【参照物】${ref.name}${ref.isCustom ? ' (精确值)' : ' (平均值)'}\n`;
   text += `  中指长度: ${fmtPlain(ref.val)}\n`;
   text += `  比例尺: 1 mm = ${pxPerMm.toFixed(2)} px\n\n`;
-
-  text += `【手部检测】\n`;
-  if (detectedHand) {
-    text += `  位置: (${Math.round(detectedHand.x)}, ${Math.round(detectedHand.y)})\n`;
-    text += `  像素尺寸: ${Math.round(detectedHand.w)} × ${Math.round(detectedHand.h)} px\n`;
-  }
-  text += `\n`;
-
-  text += `【检测到的物体】共 ${detectedObjects.length} 个\n\n`;
-  detectedObjects.forEach((obj, i) => {
-    const mark = i === selectedObjIndex ? ' ★' : '';
-    text += `${i + 1}.${mark} ${obj.name}\n`;
-    text += `   宽度: ${fmtPlain(obj.realW)}\n`;
-    text += `   高度: ${fmtPlain(obj.realH)}\n`;
-    text += `   面积: ${fmtPlain(obj.realArea)}²\n`;
-    text += `   置信度: ${obj.conf}%\n`;
-    text += `   像素尺寸: ${obj.pixelW} × ${obj.pixelH} px\n`;
-    text += `   长宽比: ${(obj.realW / obj.realH).toFixed(2)}:1\n\n`;
-  });
-
-  text += '══════════════════════════════════════\n';
-  text += '⚠️ 精度提示: 此结果为模拟AI检测，误差约±15~25%。\n';
-  text += '   精确测量请使用自定义手长标定。\n';
+  text += `【测量物体】\n`;
+  text += `  宽度: ${fmtPlain(detectedObject.realW)}\n`;
+  text += `  高度: ${fmtPlain(detectedObject.realH)}\n`;
+  text += `  面积: ${fmtPlain(detectedObject.realArea)}²\n`;
+  text += `  长宽比: ${(detectedObject.realW / detectedObject.realH).toFixed(2)}:1\n`;
+  text += `  像素尺寸: ${Math.round(detectedObject.w)} × ${Math.round(detectedObject.h)} px\n\n`;
+  text += '⚠️ 此结果为AI估算，仅供参考。\n';
 
   document.getElementById('exportPreview').textContent = text;
   document.getElementById('exportModal').classList.add('show');
 });
 
-function closeExport() {
-  document.getElementById('exportModal').classList.remove('show');
-}
-
+function closeExport() { document.getElementById('exportModal').classList.remove('show'); }
 function downloadText() {
-  const text = document.getElementById('exportPreview').textContent;
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const blob = new Blob([document.getElementById('exportPreview').textContent], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `测量结果_${new Date().toISOString().slice(0, 10)}.txt`;
-  a.click();
+  a.href = url; a.download = `测量结果_${new Date().toISOString().slice(0,10)}.txt`; a.click();
   URL.revokeObjectURL(url);
 }
-
 function downloadImage() {
-  const link = document.createElement('a');
-  link.download = `测量结果_${new Date().toISOString().slice(0, 10)}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  const a = document.createElement('a');
+  a.download = `测量结果_${new Date().toISOString().slice(0,10)}.png`;
+  a.href = canvas.toDataURL('image/png'); a.click();
 }
 
-// Buttons
-document.getElementById('btnReanalyze').addEventListener('click', () => {
-  if (img) runAnalysis();
-});
-
+document.getElementById('btnReanalyze').addEventListener('click', () => { if (img) runAnalysis(); });
 document.getElementById('btnNew').addEventListener('click', () => {
-  uploadArea.style.display = 'block';
-  mainLayout.style.display = 'none';
-  detectedObjects = [];
-  detectedHand = null;
-  img = null;
-  fileInput.value = '';
+  uploadArea.style.display = 'block'; mainLayout.style.display = 'none';
+  detectedHand = null; detectedObject = null; img = null; fileInput.value = '';
 });
 
-// Settings change -> reanalyze
-document.getElementById('sAge').addEventListener('change', () => { if (img) runAnalysis(); });
-document.getElementById('sGender').addEventListener('change', () => { if (img) runAnalysis(); });
-document.getElementById('sSize').addEventListener('change', () => { if (img) runAnalysis(); });
+['sAge','sGender','sSize'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => { if (img) runAnalysis(); });
+});
 document.getElementById('sCustom').addEventListener('input', () => { if (img) runAnalysis(); });
 
-// Close modal on backdrop click
 document.getElementById('exportModal').addEventListener('click', e => {
   if (e.target === document.getElementById('exportModal')) closeExport();
 });
