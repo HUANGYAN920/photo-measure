@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📏 AI 照片尺寸测量 — 自动识别</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <!-- COCO-SSD -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+  <!-- MediaPipe Hands -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="logo">🤖📏</div>
+      <h1>AI 照片尺寸测量工具</h1>
+      <p class="subtitle">上传照片 → AI 自动识别手和物体 → 一键计算实际尺寸</p>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <p class="loading-text" id="loadingText">正在加载 AI 模型...</p>
+        <p class="loading-sub">首次加载约需 5-15 秒，请耐心等待</p>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <section class="upload-section" id="uploadSection">
+      <div class="upload-card" id="uploadCard">
+        <div class="upload-icon">📷</div>
+        <h3>点击上传照片，或拖拽图片到此处</h3>
+        <p class="upload-desc">支持 JPG、PNG、WEBP 格式</p>
+        <div class="upload-tips">
+          <div class="tip-item">✅ 手和物体在同一平面上</div>
+          <div class="tip-item">✅ 尽量正面平拍</div>
+          <div class="tip-item">✅ 光线充足，手部清晰可见</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </div>
+    </section>
+
+    <!-- Analysis Section -->
+    <section class="analysis-section hidden" id="analysisSection">
+      <div class="analysis-card">
+        <div class="analysis-header">
+          <div class="spinner-small"></div>
+          <span>AI 正在分析照片...</span>
+        </div>
+        <div class="analysis-steps">
+          <div class="a-step" id="stepDetectHand">🔍 检测手部位置</div>
+          <div class="a-step" id="stepDetectObject">🔍 检测物体位置</div>
+          <div class="a-step" id="stepCalcScale">📐 计算比例尺</div>
+          <div class="a-step" id="stepCalcSize">📏 计算物体尺寸</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result Section -->
+    <section class="result-section hidden" id="resultSection">
+      <div class="result-card">
+        <h3>🎯 AI 测量结果</h3>
+
+        <div class="result-image-wrapper">
+          <canvas id="resultCanvas"></canvas>
+        </div>
+
+        <div class="result-details">
+          <div class="detail-row">
+            <span class="detail-label">检测到的物体</span>
+            <span class="detail-value" id="detectedObject">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">参照物</span>
+            <span class="detail-value" id="detectedHand">—</span>
+          </div>
+          <div class="detail-row highlight">
+            <span class="detail-label">物体宽度</span>
+            <span class="detail-value" id="objectWidth">—</span>
+          </div>
+          <div class="detail-row highlight">
+            <span class="detail-label">物体高度</span>
+            <span class="detail-value" id="objectHeight">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">比例尺</span>
+            <span class="detail-value" id="scaleInfo">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">精度</span>
+            <span class="detail-value" id="precisionInfo">—</span>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn btn-primary" id="btnReanalyze">🔄 重新分析</button>
+          <button class="btn btn-secondary" id="btnManualAdjust">✏️ 手动微调</button>
+          <button class="btn btn-secondary" id="btnNewPhoto2">📷 换一张照片</button>
+        </div>
+
+        <div class="precision-note">
+          <strong>⚠️ 精度说明：</strong>此结果为 AI 自动估算，基于手掌平均尺寸。实际尺寸可能因个体差异、拍摄角度等因素存在 ±15~25% 误差。如需精确测量，请使用尺子作为参照物手动标定。
+        </div>
+      </div>
+    </section>
+
+    <!-- Manual Adjust Section -->
+    <section class="manual-section hidden" id="manualSection">
+      <div class="manual-card">
+        <h3>✏️ 手动微调</h3>
+        <div class="manual-canvas-wrapper">
+          <canvas id="manualCanvas"></canvas>
+        </div>
+        <div class="manual-controls">
+          <p class="manual-hint">在照片上点击四个点：物体左上角 → 右上角 → 右下角 → 左下角</p>
+          <div class="manual-btns">
+            <button class="btn btn-primary" id="btnManualCalc">📐 计算尺寸</button>
+            <button class="btn btn-secondary" id="btnManualReset">🗑️ 重置点位</button>
+            <button class="btn btn-secondary" id="btnBackToResult">← 返回结果</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings Panel -->
+    <section class="settings-section" id="settingsSection">
+      <div class="settings-card">
+        <h4>⚙️ 参照物设置（影响测量精度）</h4>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label>年龄段</label>
+            <select id="settingAge">
+              <option value="adult" selected>成年人 (18-60岁)</option>
+              <option value="elderly">老年人 (60岁+)</option>
+              <option value="teen">青少年 (12-17岁)</option>
+              <option value="child">儿童 (4-11岁)</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label>性别</label>
+            <select id="settingGender">
+              <option value="male" selected>男性</option>
+              <option value="female">女性</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label>手掌尺寸</label>
+            <select id="settingHandSize">
+              <option value="average" selected>平均尺寸</option>
+              <option value="small">偏小</option>
+              <option value="large">偏大</option>
+            </select>
+          </div>
+          <div class="setting-item full">
+            <label>或输入精确中指长度（cm）：</label>
+            <input type="number" id="customFingerLength" placeholder="如 8.2" min="1" max="30" step="0.1">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>🤖 AI 照片尺寸测量工具 · 基于 TensorFlow.js + MediaPipe · 纯前端运行，照片不上传服务器</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
